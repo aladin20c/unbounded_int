@@ -51,22 +51,30 @@ static chiffre *create_chiffre(char c){
 
 static void free_unbounded_int(unbounded_int ui){
     chiffre *tmp=ui.premier;
-    if(tmp==NULL){
+    if(ui.premier==NULL){
       return;
+    }
+    if(ui.premier==ui.dernier){
+        free(ui.premier);
+        return;
     }
     while (tmp!=NULL) {
       chiffre *tmp2=tmp;
       tmp=tmp->suivant;
       free(tmp2);
     }
-    ui.signe='*';
-    ui.premier=NULL;
-    ui.dernier=NULL;
 }
 
 
 static void afficher_unbounded_int(unbounded_int ui){
+  if(ui.premier==NULL){
+    printf("\n");return;
+  }
   printf("%c",ui.signe);
+  if(ui.premier==ui.dernier){
+    printf("%c\n",(ui.premier)->c);
+    return;
+  }
   chiffre *tmp=ui.premier;
   while (tmp!=NULL) {
     printf("%c",tmp->c);
@@ -190,16 +198,19 @@ char *unbounded_int2string(unbounded_int ui){
   if(ui.signe=='*') return NULL;
   char * str= malloc(ui.len*sizeof(char)+2);
   if(str==NULL){
-    return "0";
+    return NULL;
   }
   if(ui.signe=='-'){
     str[0]='-';
   }else{
     str[0]='+';
   }
-
   int indice=1;
   chiffre *tmp=ui.premier;
+  if(ui.premier==ui.dernier){
+    str[indice]=tmp->c;
+    return str;
+  }
   while (tmp!=NULL) {
     str[indice]=tmp->c;
     tmp=tmp->suivant;
