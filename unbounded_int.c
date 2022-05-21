@@ -1,3 +1,5 @@
+#ifndef unbounded_int_c
+#define unbounded_int_c
 /*
    fichier contenant les definitions des fonctions données dans polynomes.h
    gcc unbounded_int.c -lm && ./a.out
@@ -127,20 +129,14 @@ static unbounded_int insertFirst(unbounded_int ui,char c){
 static unbounded_int unbounded_int_absolute_value(unbounded_int a){
     unbounded_int abs_value=create_empty_unbounded_int();
     //Initialise le signe à + (positif)
-    abs_value.signe='+';
-
-    if(a.premier==NULL){
-        fprintf(stderr, "error in function unbounded_int_absolute_value(unbounded_int)\n");
-        return create_empty_unbounded_int();
-    }else{
-        chiffre *tmp=a.premier;
-
-        do{
-            abs_value=insertLast(abs_value, tmp->c);
-            tmp=tmp->suivant;
-        }while(tmp!=NULL);
+    if(a.premier!=NULL){
+      abs_value.signe='+';
+      chiffre *tmp=a.premier;
+      do{
+        abs_value=insertLast(abs_value, tmp->c);
+        tmp=tmp->suivant;
+      }while(tmp!=NULL);
     }
-
     return abs_value;
 }
 
@@ -254,10 +250,7 @@ int unbounded_int_cmp_ll(unbounded_int a, long long b){
 }
 
 
-
-
 //--------op---------//
-
 
 static chiffre* chiffre_somme(chiffre a, chiffre b, chiffre r){
     chiffre *chiffre_zero=malloc(sizeof(chiffre));
@@ -310,8 +303,6 @@ static chiffre* chiffre_somme(chiffre a, chiffre b, chiffre r){
 
 static chiffre* chiffre_difference(chiffre a, chiffre b, chiffre r){
     //Vérifier que a>b>0
-
-
     chiffre *chiffre_zero=malloc(sizeof(chiffre));
     chiffre_zero->c='0';
     chiffre *chiffre_dix=malloc(sizeof(chiffre));
@@ -342,7 +333,6 @@ static chiffre* chiffre_difference(chiffre a, chiffre b, chiffre r){
         //initialise le suivant de tmp.precedent
         tmp->precedent->suivant=tmp;
     }
-
     //libère la retenu du prochain calcul, le chiffre zero et le chiffre dix
     free(r_tmp);
     free(chiffre_zero);
@@ -395,18 +385,15 @@ unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
     //−(|a| + |b|)
     }else if(a.signe=='-' && b.signe=='-'){
         return unbounded_int_somme_aux(a,b,'-');
-
     //a − |b|
     }else if(a.signe=='+' && b.signe=='-'){
         //|a|>|b|
-
         if(unbounded_int_cmp_unbounded_int(a, unbounded_int_absolute_value(b))>=0){
             return unbounded_int_difference_aux(a,b,'+');
         //|a|<|b|
         }else{
             return unbounded_int_difference_aux(b,a,'-');
         }
-
     //b − |a|
     }else{
         //|a|>|b|
@@ -486,5 +473,7 @@ unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b){
   free_unbounded_int(ex22);
   free_unbounded_int(ex3);
   free_unbounded_int(ex4);
-}
-*/
+}*/
+
+
+#endif

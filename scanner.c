@@ -69,15 +69,15 @@ void print(Key t){
 
 
 
-static int lettre(char c) {
+static int estLettre(char c) {
   return (c>='a' && c<='z')||(c>='A' && c<='Z');
 }
 
-static int chiffre(char c) {
+static int estChiffre(char c) {
   return c>='0' && c<='9';
 }
 
-static int fin() {
+static int estFin() {
   return *scanner.current == '\0';
 }
 
@@ -130,7 +130,7 @@ static Type checkKeyword(int start, int length,const char* rest, Type type) {
 
 
 static Key variable() {
-  while (lettre(peek())) avance();
+  while (estLettre(peek())) avance();
   Type type=VARIABLE;
   if(scanner.start[0]=='p'){
     type=checkKeyword(1, 4, "rint", PRINT);
@@ -145,7 +145,7 @@ static Key variable() {
 
 
 static Key nombre() {
-  while (chiffre(peek())) avance();
+  while (estChiffre(peek())) avance();
   char e=peek();
   if(e==' '||e=='\r'||e=='\t'||e=='\n' || e=='\0'){
     return makeKey(NUMBER);
@@ -160,20 +160,20 @@ static Key nombre() {
 Key getNext(){
   skip();
   scanner.start = scanner.current;
-  if (fin()) return makeKey(END);
+  if (estFin()) return makeKey(END);
   char c = avance();
-  if (lettre(c)) return variable();
-  if (chiffre(c)) return nombre();
+  if (estLettre(c)) return variable();
+  if (estChiffre(c)) return nombre();
 
   char e=peek();
   if(c=='='){
     return makeKey(EQUAL);
   }else if(c=='-'){
     if(e==' '||e=='\r'||e=='\t') return makeKey(MINUS);
-    if(chiffre(e)) return nombre();
+    if(estChiffre(e)) return nombre();
   }else if(c=='+'){
     if(e==' '||e=='\r'||e=='\t') return  makeKey(PLUS);
-    if(chiffre(e)) return nombre();
+    if(estChiffre(e)) return nombre();
   }else if(c=='/'){
     if(e==' '||e=='\r'||e=='\t') return makeKey(SLASH);
   }else if(c=='%'){
