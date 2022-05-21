@@ -17,47 +17,47 @@ typedef struct {
   int capacity;
   int count;
   Value* values;
-} ValueArray;
+} ValueMap;
 
 
-ValueArray array;
+ValueMap map;
 
 
-void initValueArray();
-void freeValueArray();
+void initValueMap();
+void freeValueMap();
+void addValue(Value value);
 
-
-void initValueArray() {
-  array->values = NULL;
-  array->capacity = 0;
-  array->count = 0;
+void initValueMap() {
+  map->values = NULL;
+  map->capacity = 0;
+  map->count = 0;
 }
 
-void freeValueArray() {
-  free(array->values);
-  initValueArray(array);
+void freeValueMap() {
+  free(map->values);
+  initValueMap(map);
 }
 
 
-static void writeValueArray(Value value) {
-  if(array->values==NULL){
-    array->values=(Value*)malloc(8 * sizeof(Value));
-    array->capacity=8;
+void addValue(Value value) {
+  if(map->values==NULL){
+    map->values=(Value*)malloc(8 * sizeof(Value));
+    map->capacity=8;
   }
-  for(int i=0;i<array->count;i++){
-    if(array->values[i]->token->start==value->token->start){
-      array->values[i]->val = value->val;
+  for(int i=0;i<map->count;i++){
+    if(map->values[i]->token->start==value->token->start){
+      map->values[i]->val = value->val;
       return;
     }
   }
-  if (array->capacity < array->count + 1) {
-    int oldCapacity = array->capacity;
+  if (map->capacity < map->count + 1) {
+    int oldCapacity = map->capacity;
     int newCapacity = ((oldCapacity) < 8 ? 8 : (oldCapacity) * 2);
-    array->values = (Value*)realloc(array->values,newCapacity+sizeof(Token));
-    array->capacity =newCapacity;
+    map->values = (Value*)realloc(map->values,newCapacity+sizeof(Token));
+    map->capacity =newCapacity;
   }
-  array->values[array->count] = value;
-  array->count++;
+  map->values[map->count] = value;
+  map->count++;
 }
 
 

@@ -24,6 +24,7 @@ static void interpret(const char* source) {
   for(int i=0;i<array.count;i++){
     print(array.keys[i]);
   }
+  
 
 
   printf("\n----------src-------------\n");
