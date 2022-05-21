@@ -8,9 +8,8 @@
 
 
 typedef struct {
-  int capacity;
-  int count;
-  Token token;
+  Key key;
+  Key val;
 } Value;
 
 
@@ -47,7 +46,7 @@ static void writeValueArray(Value value) {
   }
   for(int i=0;i<array->count;i++){
     if(array->values[i]->token->start==value->token->start){
-      //array->values[i]
+      array->values[i]->val = value->val;
       return;
     }
   }

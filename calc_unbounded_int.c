@@ -1,21 +1,89 @@
-/*
-Rules for naming a variable
--A variable name can only have letters (both uppercase and lowercase letters), digits and underscore.
--The first letter of a variable should be either a letter or an underscore.
--There is no rule on how long a variable name (identifier) can be. However, you may run into problems in
-some compilers if the variable name is longer than 31 characters.
 
-(A) variable = entier_ou_variable op entier_ou_variable
-(B) variable = entier
-(C) print variable
-(D)ligne vide
-** valeur initiale de chaque variable est 0
+// gcc -Wall calc_unbounded_int.c && ./a.out ex
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "scanner.c"
+
+/*--------------------------------------interpretation--------------------------------------*/
 
 
-Pour la lecture du fichier on préfère que vous n’imposiez
-aucune contrainte sur la longueur de la ligne. Si vous ne savez pas le
-faire alors calc_unbounded_int doit être capable de lire au moins les lignes de
-longueur 1024.
+
+static void interpret(const char* source) {
+  initScanner(source);
+
+  Key t=getNext();
+  while (t.type!=END && t.type!=ERROR) {
+    print(t);
+    t=getNext();
+  }
+
+  printf("\n----------src-------------\n");
+  printf("%s\n",source);
+}
+/*-------------------------------------------------------------------------------------------*/
 
 
-*/
+/*reading file*/
+static char* readFile(const char* path) {
+  FILE* file = fopen(path, "rb");
+  if (file == NULL) {
+    fprintf(stderr, "Could not open file \"%s\".\n", path);
+    exit(74);
+  }
+  fseek(file, 0L, SEEK_END);
+  size_t fileSize = ftell(file);
+  rewind(file);
+
+  char* buffer = (char*)malloc(fileSize + 1);
+  if (buffer == NULL) {
+    fprintf(stderr, "Not enough memory to read \"%s\".\n", path);
+    exit(74);
+  }
+  size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
+  if (bytesRead < fileSize) {
+    fprintf(stderr, "Could not read file \"%s\".\n", path);
+    exit(74);
+  }
+  buffer[bytesRead] = '\0';
+  fclose(file);
+  return buffer;
+}
+
+/*running program*/
+static void runFile(const char* path) {
+  char* source = readFile(path);
+  interpret(source);
+  free(source);
+}
+
+
+/*reading from stdin line by line*/
+static void repl() {
+  char line[1024];
+  for (;;) {
+    printf("> ");
+
+    if (!fgets(line, sizeof(line), stdin)) {
+      printf("\n");
+      break;
+    }
+
+    interpret(line);
+  }
+}
+
+
+/*-----------main-----------*/
+int main(int argc, const char* argv[]) {
+  /*if (argc == 0) {
+    repl();
+  } else if (argc == 2) {*/
+    runFile(argv[1]);
+  /*} else {
+    fprintf(stderr, "Usage: clox [path]\n");
+    exit(64);
+  }*/
+  return 0;
+}

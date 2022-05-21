@@ -7,36 +7,31 @@
 #include <string.h>
 
 
-
-//______________________________________________________________________________________
-
 typedef enum {
-  TOKEN_MINUS, TOKEN_PLUS,TOKEN_SLASH, TOKEN_PERC ,TOKEN_STAR,TOKEN_EQUAL,
-  TOKEN_IDENTIFIER,TOKEN_NUMBER,
-  TOKEN_PRINT,
-  TOKEN_ERROR, TOKEN_EOF
-} TokenType;
+  MINUS, PLUS,SLASH, PERCENTAGE ,STAR,EQUAL,
+  VARIABLE,NUMBER,
+  PRINT,
+  ERROR, END
+} Type;
 
 
 typedef struct {
-  TokenType type;
-  const char* start;
+  Type type;
+  char* start;
   int length;
   int line;
-} Token;
+} Key;
 
 
 void initScanner(const char* source);
-void print_token(Token t);
-Token scanToken();
-
-//______________________________________________________________________________________
+void print(Key t);
+Key getNext();
 
 
 /*initialising scanner*/
 typedef struct {
-  const char* start;
-  const char* current;
+  char* start;
+  char* current;
   int line;
 } Scanner;
 
@@ -51,20 +46,20 @@ void initScanner(const char* source) {
 }
 
 
-void print_token(Token t){
+void print(Key t){
   printf("Type: ");
   switch (t.type) {
     case 0:printf("%s\n","minus" );break;
     case 1:printf("%s\n","plus" );break;
     case 2:printf("%s\n", "slash");break;
-    case 3:printf("%s\n", "perc");break;
+    case 3:printf("%s\n", "percentage");break;
     case 4:printf("%s\n", "star");break;
     case 5:printf("%s\n", "equal");break;
-    case 6:printf("%s\n","ident" );break;
+    case 6:printf("%s\n","variable" );break;
     case 7:printf("%s\n","number" );break;
     case 8:printf("%s\n", "print");break;
     case 9:printf("%s\n", "Error");break;
-    case 10:printf("%s\n", "EOF");break;
+    case 10:printf("%s\n", "end");break;
   }
   printf("Length: %d\n", t.length);
   printf("Line: %d\n", t.line);
@@ -75,121 +70,138 @@ void print_token(Token t){
 }
 
 
-/*aux functions*/
 
 
-
-static int isAlpha(char c) {
-  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+static int lettre(char c) {
+  return (c>='a' && c<='z')||(c>='A' && c<='Z');
 }
 
-static int isDigit(char c) {
-  return c >= '0' && c <= '9';
+static int chiffre(char c) {
+  return c>='0' && c<='9';
 }
 
-static int isAtEnd() {
+static int fin() {
   return *scanner.current == '\0';
 }
 
-static char advance() {
+
+static char avance() {
   scanner.current++;
   return scanner.current[-1];
 }
-
 
 static char peek() {
   return *scanner.current;
 }
 
-
 static char peekNext() {
-  if (isAtEnd()) return '\0';
+  if (fin()) return '\0';
   return scanner.current[1];
 }
 
-
 static int match(char expected) {
-  if (isAtEnd()) return 0;
+  if (fin()) return 0;
   if (*scanner.current != expected) return 0;
   scanner.current++;
   return 1;
 }
 
 
-static Token makeToken(TokenType type) {
-  Token token;
-  token.type = type;
-  token.start = scanner.start;
-  token.length = (int)(scanner.current - scanner.start);
-  token.line = scanner.line;
-  return token;
+
+static Key makeKey(Type type) {
+  Key key;
+  key.type = type;
+  key.start = scanner.start;
+  key.length = (int)(scanner.current - scanner.start);
+  key.line = scanner.line;
+  return key;
 }
 
 
-static Token errorToken() {
-  Token token;
-  token.type = TOKEN_ERROR;
-  token.start = scanner.current;
-  token.length = 1;
-  token.line = scanner.line;
-  return token;
-}
 
-
-static void skipWhitespace() {
-  for (;;) {
+static void skip() {
+  while (1) {
     char c = peek();
-    switch (c) {
-      case ' ':advance();break;
-      case '\r':advance();break;
-      case '\t':advance();break;
-      case '\n':scanner.line++;advance();break;
-      default: return;
+    if(c==' '||c=='\r'||c=='\t'){
+      avance();
+    }else if(c=='\n'){
+      scanner.line++;avance();
+    }else{
+      return;
     }
   }
 }
 
 
-static TokenType checkKeyword(int start, int length,const char* rest, TokenType type) {
+
+
+
+static Type checkKeyword(int start, int length,const char* rest, Type type) {
   if (scanner.current - scanner.start == start + length &&
       memcmp(scanner.start + start, rest, length) == 0) {
     return type;
   }
-  return TOKEN_IDENTIFIER;
+  return VARIABLE;
 }
 
-static Token identifier() {
-  while (isAlpha(peek()) || isDigit(peek())) advance();
-  TokenType type=TOKEN_IDENTIFIER;
+
+static Key variable() {
+  while (lettre(peek())) avance();
+  Type type=VARIABLE;
+
   if(scanner.start[0]=='p'){
-    type=checkKeyword(1, 4, "rint", TOKEN_PRINT);
+    type=checkKeyword(1, 4, "rint", PRINT);
   }
-  return makeToken(type);
+
+  char e=peek();
+  if(e==' '||e=='\r'||e=='\t'||e=='\n'|| (type==VARIABLE && e=='=')){
+    return makeKey(type);
+  }else{
+    return makeKey(ERROR);
+  }
+
+}
+
+
+static Key nombre() {
+  while (chiffre(peek())) avance();
+  char e=peek();
+  if(e==' '||e=='\r'||e=='\t'||e=='\n'){
+    return makeKey(NUMBER);
+  }else{
+    return makeKey(ERROR);
+  }
 }
 
 
 
-static Token number() {
-  while (isDigit(peek())) advance();
-  return makeToken(TOKEN_NUMBER);
-}
 
-
-Token scanToken() {
-  skipWhitespace();
+Key getNext(){
+  skip();
   scanner.start = scanner.current;
-  if (isAtEnd()) return makeToken(TOKEN_EOF);
-  char c = advance();
-  if (isAlpha(c)) return identifier();
-  if (isDigit(c)) return number();
-  switch (c) {
-    case '=':return makeToken(TOKEN_EQUAL);
-    case '-': return makeToken(TOKEN_MINUS);
-    case '+': return makeToken(TOKEN_PLUS);
-    case '/': return makeToken(TOKEN_SLASH);
-    case '*': return makeToken(TOKEN_STAR);
+  if (fin()) return makeKey(END);
+  char c = avance();
+  if (lettre(c)) return variable();
+  if (chiffre(c)) return nombre();
+
+  char e=peek();
+  if(c=='='){
+    return makeKey(EQUAL);
+  }else if(c=='-'){
+    if(e==' '||e=='\r'||e=='\t') return makeKey(MINUS);
+    if(chiffre(e)) return nombre();
+  }else if(c=='+'){
+    if(e==' '||e=='\r'||e=='\t') return  makeKey(PLUS);
+    if(chiffre(e)) return nombre();
+  }else if(c=='/'){
+    if(e==' '||e=='\r'||e=='\t') return makeKey(SLASH);
+  }else if(c=='%'){
+    if(e==' '||e=='\r'||e=='\t') return makeKey(PERCENTAGE);
+  }else if(c=='*'){
+    if(e==' '||e=='\r'||e=='\t') return makeKey(STAR);
+  }else{
+    return makeKey(ERROR);
   }
-  return errorToken();
 }
 
 #endif
