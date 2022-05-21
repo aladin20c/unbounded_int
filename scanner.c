@@ -17,7 +17,7 @@ typedef enum {
 
 typedef struct {
   Type type;
-  char* start;
+  const char* start;
   int length;
   int line;
 } Key;
@@ -30,8 +30,8 @@ Key getNext();
 
 /*initialising scanner*/
 typedef struct {
-  char* start;
-  char* current;
+  const char* start;
+  const char* current;
   int line;
 } Scanner;
 
@@ -47,26 +47,23 @@ void initScanner(const char* source) {
 
 
 void print(Key t){
-  printf("Type: ");
   switch (t.type) {
-    case 0:printf("%s\n","minus" );break;
-    case 1:printf("%s\n","plus" );break;
-    case 2:printf("%s\n", "slash");break;
-    case 3:printf("%s\n", "percentage");break;
-    case 4:printf("%s\n", "star");break;
-    case 5:printf("%s\n", "equal");break;
-    case 6:printf("%s\n","variable" );break;
-    case 7:printf("%s\n","number" );break;
-    case 8:printf("%s\n", "print");break;
-    case 9:printf("%s\n", "Error");break;
-    case 10:printf("%s\n", "end");break;
+    case 0:printf("{type: %s,length: %d, line:%d}   :","minus",t.length,t.line);break;
+    case 1:printf("{type: %s,length: %d, line:%d}   :","plus",t.length,t.line);break;
+    case 2:printf("{type: %s,length: %d, line:%d}   :", "slash",t.length,t.line);break;
+    case 3:printf("{type: %s,length: %d, line:%d}   :", "percentage",t.length,t.line);break;
+    case 4:printf("{type: %s,length: %d, line:%d}   :", "star",t.length,t.line);break;
+    case 5:printf("{type: %s,length: %d, line:%d}   :", "equal",t.length,t.line);break;
+    case 6:printf("{type: %s,length: %d, line:%d}   :","variable",t.length,t.line);break;
+    case 7:printf("{type: %s,length: %d, line:%d}   :","number",t.length,t.line);break;
+    case 8:printf("{type: %s,length: %d, line:%d}   :", "print",t.length,t.line);break;
+    case 9:printf("{type: %s,length: %d, line:%d}   :", "Error",t.length,t.line);break;
+    case 10:printf("{type: %s,length:%d, line:%d}   \\0:", "end",t.length,t.line);break;
   }
-  printf("Length: %d\n", t.length);
-  printf("Line: %d\n", t.line);
   for(int i=0;i<t.length;i++){
     printf("%c", t.start[i]);
   }
-  printf("\n-----------------------------------------------------------------------\n");
+  printf("\n");
 }
 
 

@@ -6,45 +6,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-
-
 #include "unbounded_int.h"
-
-
-static unbounded_int create_empty_unbounded_int();
-
-static chiffre *create_chiffre(char c);
-
-static void free_unbounded_int(unbounded_int ui);
-
-static void afficher_unbounded_int(unbounded_int ui);
-
-static int matchesnumber(const char* str);
-
-static unbounded_int insertLast(unbounded_int ui,char c);
-
-static unbounded_int insertFirst(unbounded_int ui,char c);
-
-static unbounded_int unbounded_int_absolute_value(unbounded_int a);
-
-static chiffre* chiffre_somme(chiffre a, chiffre b, chiffre r);
-
-static chiffre* chiffre_difference(chiffre a, chiffre b, chiffre r);
-
-static unbounded_int unbounded_int_somme_aux(unbounded_int a, unbounded_int b, char signe);
-
-static unbounded_int unbounded_int_difference_aux(unbounded_int a, unbounded_int b, char signe);
-
-
-
-/*---------------------------------------------MAIN---------------------------------------------*/
 
 
 
 static unbounded_int create_empty_unbounded_int(){
   return (unbounded_int){.signe='*', .len=0, .premier=NULL, .dernier=NULL};
 }
-
 
 static chiffre *create_chiffre(char c){
   chiffre *ch=malloc(sizeof(chiffre));
@@ -57,7 +25,6 @@ static chiffre *create_chiffre(char c){
   ch->precedent=NULL;
   return ch;
 }
-
 
 static void free_unbounded_int(unbounded_int ui){
     chiffre *tmp=ui.premier;
@@ -74,7 +41,6 @@ static void free_unbounded_int(unbounded_int ui){
       free(tmp2);
     }
 }
-
 
 static void afficher_unbounded_int(unbounded_int ui){
   if(ui.premier==NULL){
@@ -93,11 +59,9 @@ static void afficher_unbounded_int(unbounded_int ui){
   printf("\n");
 }
 
-
 static int matches_unbounded_int(const char* e){
   if(strlen(e)==0) {return 0;}
   if(e[0]!='+' && e[0]!='-' &&( e[0]<'0' || e[0]>'9')) {return 0;}
-
   for (int i = 1; i < strlen(e); i++) {
     if(e[i]<'0' || e[i]>'9'){
       return 0;
@@ -105,7 +69,6 @@ static int matches_unbounded_int(const char* e){
   }
   return 1;
 }
-
 
 static unbounded_int insertLast(unbounded_int ui,char c){
   chiffre *ch=create_chiffre(c);
@@ -134,7 +97,6 @@ static unbounded_int insertLast(unbounded_int ui,char c){
   return ui;
 }
 
-
 static unbounded_int insertFirst(unbounded_int ui,char c){
   chiffre *ch=create_chiffre(c);
   if(ch==NULL){
@@ -162,7 +124,6 @@ static unbounded_int insertFirst(unbounded_int ui,char c){
   return ui;
 }
 
-
 static unbounded_int unbounded_int_absolute_value(unbounded_int a){
     unbounded_int abs_value=create_empty_unbounded_int();
     //Initialise le signe à + (positif)
@@ -182,7 +143,6 @@ static unbounded_int unbounded_int_absolute_value(unbounded_int a){
 
     return abs_value;
 }
-
 
 unbounded_int string2unbounded_int(const char *e){
 
@@ -204,7 +164,6 @@ unbounded_int string2unbounded_int(const char *e){
   return ui;
 }
 
-
 unbounded_int ll2unbounded_int(long long i){
   unbounded_int ui = create_empty_unbounded_int();
   if(i<0){
@@ -221,7 +180,6 @@ unbounded_int ll2unbounded_int(long long i){
   }
   return ui;
 }
-
 
 char *unbounded_int2string(unbounded_int ui){
   if(ui.signe=='*') return NULL;
@@ -247,7 +205,6 @@ char *unbounded_int2string(unbounded_int ui){
   }
   return str;
 }
-
 
 int unbounded_int_cmp_unbounded_int(unbounded_int a, unbounded_int b){
   if(a.signe=='*'){
@@ -288,7 +245,6 @@ int unbounded_int_cmp_unbounded_int(unbounded_int a, unbounded_int b){
   return 0;
 }
 
-
 int unbounded_int_cmp_ll(unbounded_int a, long long b){
   if(a.signe=='*'){
     return -1;
@@ -297,7 +253,13 @@ int unbounded_int_cmp_ll(unbounded_int a, long long b){
   return unbounded_int_cmp_unbounded_int(a,a2);
 }
 
-static chiffre* chiffre_somme(chiffre a, chiffre b, chiffre r){ 
+
+
+
+//--------op---------//
+
+
+static chiffre* chiffre_somme(chiffre a, chiffre b, chiffre r){
     chiffre *chiffre_zero=malloc(sizeof(chiffre));
     chiffre_zero->c='0';
     //somme des entiers courants et de la retenue le tout modulo 10
@@ -312,19 +274,19 @@ static chiffre* chiffre_somme(chiffre a, chiffre b, chiffre r){
         //Si retenu!=0
         if(r_tmp->c!='0'){
             //calcul de chiffre+1 avec la retenu
-            tmp->precedent=chiffre_somme(*chiffre_zero, *chiffre_zero, *r_tmp);     
+            tmp->precedent=chiffre_somme(*chiffre_zero, *chiffre_zero, *r_tmp);
             //initialise le suivant de tmp.precedent
             tmp->precedent->suivant=tmp;
         }
-    
-    //si a.precedent est null 
+
+    //si a.precedent est null
     }else if(a.precedent==NULL){
         //retourn somme de 0 et b.precedent
-        tmp->precedent=chiffre_somme(*chiffre_zero, *b.suivant, *r_tmp);    
+        tmp->precedent=chiffre_somme(*chiffre_zero, *b.suivant, *r_tmp);
         //initialise le suivant de tmp.precedent
         tmp->precedent->suivant=tmp;
 
-    //si b.precedent est null 
+    //si b.precedent est null
     }else if(b.precedent==NULL){
         //retourn somme de 0 et a.precedent
         tmp->precedent=chiffre_somme(*a.precedent, *chiffre_zero, *r_tmp);
@@ -346,8 +308,7 @@ static chiffre* chiffre_somme(chiffre a, chiffre b, chiffre r){
     return tmp;
 }
 
-
-static chiffre* chiffre_difference(chiffre a, chiffre b, chiffre r){ 
+static chiffre* chiffre_difference(chiffre a, chiffre b, chiffre r){
     //Vérifier que a>b>0
 
 
@@ -390,10 +351,9 @@ static chiffre* chiffre_difference(chiffre a, chiffre b, chiffre r){
     return tmp;
 }
 
-
 static unbounded_int unbounded_int_somme_aux(unbounded_int a, unbounded_int b, char signe){
     unbounded_int resultat=create_empty_unbounded_int();
-    //Initialise le dernier chiffre 
+    //Initialise le dernier chiffre
     resultat.dernier=chiffre_somme(*a.dernier,*b.dernier,*(create_chiffre('0')));
     //Initialise len et le premier chiffre
     chiffre tmp=*(resultat.dernier);
@@ -403,16 +363,15 @@ static unbounded_int unbounded_int_somme_aux(unbounded_int a, unbounded_int b, c
         tmp=*(tmp.precedent);
     }
     resultat.premier=&(tmp);
-    //Initialise le signe 
+    //Initialise le signe
     resultat.signe=signe;
 
     return resultat;
 }
 
-
 static unbounded_int unbounded_int_difference_aux(unbounded_int a, unbounded_int b, char signe){
     unbounded_int resultat=create_empty_unbounded_int();
-    //Initialise le dernier chiffre 
+    //Initialise le dernier chiffre
     resultat.dernier=chiffre_difference(*a.dernier,*b.dernier,*create_chiffre('0'));
     //Initialise len et le premier chiffre
     chiffre tmp=*(resultat.dernier);
@@ -422,9 +381,9 @@ static unbounded_int unbounded_int_difference_aux(unbounded_int a, unbounded_int
         tmp=*(tmp.precedent);
     }
     resultat.premier=&(tmp);
-    //Initialise le signe 
+    //Initialise le signe
     resultat.signe=signe;
-    
+
     return resultat;
 }
 
@@ -437,25 +396,25 @@ unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
     }else if(a.signe=='-' && b.signe=='-'){
         return unbounded_int_somme_aux(a,b,'-');
 
-    //a − |b| 
+    //a − |b|
     }else if(a.signe=='+' && b.signe=='-'){
         //|a|>|b|
 
         if(unbounded_int_cmp_unbounded_int(a, unbounded_int_absolute_value(b))>=0){
             return unbounded_int_difference_aux(a,b,'+');
-        //|a|<|b| 
+        //|a|<|b|
         }else{
             return unbounded_int_difference_aux(b,a,'-');
         }
 
-    //b − |a| 
+    //b − |a|
     }else{
         //|a|>|b|
         if(unbounded_int_cmp_unbounded_int(a, unbounded_int_absolute_value(b))>=0){
             return unbounded_int_difference_aux(b,a,'+');
-        //|a|<|b| 
+        //|a|<|b|
         }else{
-            return unbounded_int_difference_aux(a,b,'-');            
+            return unbounded_int_difference_aux(a,b,'-');
         }
 
     }
@@ -471,13 +430,13 @@ unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b){
         //|a|<|b|
         }else{
             return unbounded_int_difference_aux(b,a,'-');
-        } 
+        }
     //|b| − |a|
     }else if(a.signe=='-' && b.signe=='-'){
         //|a|>|b|
         if(unbounded_int_cmp_unbounded_int(unbounded_int_absolute_value(a),unbounded_int_absolute_value(b))>=0){
             return unbounded_int_difference_aux(a,b,'-');
-        //|a|<|b| 
+        //|a|<|b|
         }else{
             return unbounded_int_difference_aux(b,a,'+');
         }
@@ -491,13 +450,20 @@ unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b){
 }
 
 
+
+/*---------------------------------------------MAIN---------------------------------------------*/
+
 int main(int argc, char const *argv[]) {
   unbounded_int ex1=string2unbounded_int("-93823876688");
   unbounded_int ex2=ll2unbounded_int((long long)+93807);
   afficher_unbounded_int(ex1);
   afficher_unbounded_int(ex2);
   printf("%d\n", unbounded_int_cmp_unbounded_int(ex1,ex2));
-  printf("%d\n", unbounded_int_cmp_ll(ex1,+9382388)); 
+  printf("%d\n", unbounded_int_cmp_ll(ex1,-93823876688));
+
+  unbounded_int ex11=string2unbounded_int("+11");
+  unbounded_int ex22=ll2unbounded_int((long long)+11);
+  printf("%d\n", unbounded_int_cmp_unbounded_int(ex11,ex22));
 
   printf("Test de unbounded_int_somme :\n");
   unbounded_int ex3=create_empty_unbounded_int();
@@ -513,10 +479,11 @@ int main(int argc, char const *argv[]) {
   unbounded_int res=unbounded_int_somme(ex3,ex4);
   printf("Resultat :");
   afficher_unbounded_int(res);
-
   //free
   free_unbounded_int(ex1);
   free_unbounded_int(ex2);
+  free_unbounded_int(ex11);
+  free_unbounded_int(ex22);
   free_unbounded_int(ex3);
   free_unbounded_int(ex4);
 }

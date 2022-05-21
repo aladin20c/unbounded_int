@@ -28,36 +28,39 @@ void freeValueMap();
 void addValue(Value value);
 
 void initValueMap() {
-  map->values = NULL;
-  map->capacity = 0;
-  map->count = 0;
+  map.values = NULL;
+  map.capacity = 0;
+  map.count = 0;
 }
 
 void freeValueMap() {
-  free(map->values);
-  initValueMap(map);
+  free(map.values);
+  initValueMap();
 }
 
 
 void addValue(Value value) {
-  if(map->values==NULL){
-    map->values=(Value*)malloc(8 * sizeof(Value));
-    map->capacity=8;
+  if(map.values==NULL){
+    map.values=(Value*)malloc(8 * sizeof(Value));
+    map.capacity=8;
   }
-  for(int i=0;i<map->count;i++){
-    if(map->values[i]->token->start==value->token->start){
-      map->values[i]->val = value->val;
+
+  //research value
+  for(int i=0;i<map.count;i++){
+    if(map.values[i].key.start==value.key.start){
+      map.values[i].val = value.val;
       return;
     }
   }
-  if (map->capacity < map->count + 1) {
-    int oldCapacity = map->capacity;
+
+  if (map.capacity <= map.count + 1) {
+    int oldCapacity = map.capacity;
     int newCapacity = ((oldCapacity) < 8 ? 8 : (oldCapacity) * 2);
-    map->values = (Value*)realloc(map->values,newCapacity+sizeof(Token));
-    map->capacity =newCapacity;
+    map.values = (Value*)realloc(map.values,newCapacity+sizeof(Key));
+    map.capacity =newCapacity;
   }
-  map->values[map->count] = value;
-  map->count++;
+  map.values[map.count] = value;
+  map.count++;
 }
 
 

@@ -28,19 +28,19 @@ void initKeyArray() {
 
 void freeKeyArray() {
   free(array.keys);
-  initKeyArray(array);
+  initKeyArray();
 }
 
 
 void addKey(Key key){
   if(array.keys==NULL){
-    array.keys=(Key*)malloc(8 * sizeof(Key));
-    array.capacity=8;
+    array.keys=(Key*)malloc(2 * sizeof(Key));
+    array.capacity=2;
   }
-  if (array.capacity < array.count + 1) {
+  if (array.capacity <= array.count + 1) {
     int oldCapacity = array.capacity;
-    int newCapacity = ((oldCapacity) < 8 ? 8 : (oldCapacity) * 2);
-    array.keys = (Key*)realloc(array.keys,newCapacity+sizeof(Key));
+    int newCapacity = oldCapacity * 2;
+    array.keys = (Key*)realloc(array.keys,newCapacity*sizeof(Key));
     array.capacity =newCapacity;
   }
   array.keys[array.count] = key;
