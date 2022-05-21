@@ -1,4 +1,5 @@
-
+#ifndef unbounded_int_h
+#define unbounded_int_h
 /*Les entiers seront représentés par des listes doublements chaînées
 Les champs precedent et suivant pointent respectivement vers le bloc précédent et suivant.*/
 
@@ -64,3 +65,7 @@ unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b);
 
 /*renvoyant la représentation de leur produit,*/
 unbounded_int unbounded_int_produit( unbounded_int a, unbounded_int b);
+
+
+
+#endif

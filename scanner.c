@@ -196,6 +196,7 @@ Key getNext(){
   }else{
     return makeKey(ERROR);
   }
+  return makeKey(ERROR);
 }
 
 #endif

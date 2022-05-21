@@ -6,7 +6,6 @@
 #include <string.h>
 #include "scanner.c"
 
-
 typedef struct {
   Key key;
   Key val;
