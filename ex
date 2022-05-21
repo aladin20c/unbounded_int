@@ -6,6 +6,4 @@ print c
 
 
 
-
-
    a = c

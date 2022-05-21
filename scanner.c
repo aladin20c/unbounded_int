@@ -148,25 +148,22 @@ static Type checkKeyword(int start, int length,const char* rest, Type type) {
 static Key variable() {
   while (lettre(peek())) avance();
   Type type=VARIABLE;
-
   if(scanner.start[0]=='p'){
     type=checkKeyword(1, 4, "rint", PRINT);
   }
-
   char e=peek();
-  if(e==' '||e=='\r'||e=='\t'||e=='\n'|| (type==VARIABLE && e=='=')){
+  if(e==' '||e=='\r'||e=='\t'||e=='\n'|| e=='\0' || (type==VARIABLE && e=='=')){
     return makeKey(type);
   }else{
     return makeKey(ERROR);
   }
-
 }
 
 
 static Key nombre() {
   while (chiffre(peek())) avance();
   char e=peek();
-  if(e==' '||e=='\r'||e=='\t'||e=='\n'){
+  if(e==' '||e=='\r'||e=='\t'||e=='\n' || e=='\0'){
     return makeKey(NUMBER);
   }else{
     return makeKey(ERROR);

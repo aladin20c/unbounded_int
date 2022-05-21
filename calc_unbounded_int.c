@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "scanner.c"
+#include "keys.c"
 
 /*--------------------------------------interpretation--------------------------------------*/
 
@@ -12,15 +13,22 @@
 
 static void interpret(const char* source) {
   initScanner(source);
+  initKeyArray();
 
-  Key t=getNext();
-  while (t.type!=END && t.type!=ERROR) {
-    print(t);
+  Key t;
+  do{
     t=getNext();
+    addKey(t);
+  }while (t.type!=END && t.type!=ERROR);
+
+  for(int i=0;i<array.count;i++){
+    print(array.keys[i]);
   }
+
 
   printf("\n----------src-------------\n");
   printf("%s\n",source);
+  freeKeyArray();
 }
 /*-------------------------------------------------------------------------------------------*/
 
