@@ -29,7 +29,7 @@ static void analyse(char* source,Key *point1,Key *point2,size_t length) {
   }else if(length==3){
 
     //variable = entier
-    if(point1[0].type!=VARIABLE || point1[1].type!=EQUAL || (point1[2].type!=VARIABLE && point1[2].type!=NUMBER)){
+    if(point1[0].type!=VARIABLE || point1[1].type!=EQUAL || point1[2].type!=NUMBER){
         fprintf(stderr, "%s %d %s\n","error at line",point1->line,"unrecognized sequence");
         free(source);
         freeValueMap();
@@ -76,7 +76,6 @@ static void interpret(const char* source) {
     addKey(t);
   }while (t.type!=END && t.type!=ERROR);
   //analysing
-  size_t length=0;
   Key* point1=array.keys;
   Key* point2=array.keys;
   while (point1->type!=END) {

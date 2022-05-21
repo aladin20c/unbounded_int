@@ -91,19 +91,6 @@ static char peek() {
   return *scanner.current;
 }
 
-static char peekNext() {
-  if (fin()) return '\0';
-  return scanner.current[1];
-}
-
-static int match(char expected) {
-  if (fin()) return 0;
-  if (*scanner.current != expected) return 0;
-  scanner.current++;
-  return 1;
-}
-
-
 
 static Key makeKey(Type type) {
   Key key;

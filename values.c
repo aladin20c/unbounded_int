@@ -51,7 +51,6 @@ void addValue(Value value) {
       return;
     }
   }
-
   if (map.capacity <= map.count + 1) {
     int oldCapacity = map.capacity;
     int newCapacity = ((oldCapacity) < 8 ? 8 : (oldCapacity) * 2);
