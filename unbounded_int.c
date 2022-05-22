@@ -164,7 +164,7 @@ static char *unbounded_int_to_inv_str(unbounded_int ui){
 
 //retourne un string representant un unbounded int representant un string inversé (absolu)
 static unbounded_int str_to_inv_unbounded_int( const char *e){
-  
+
   unbounded_int ui = create_empty_unbounded_int();
   if(! matches_unbounded_int(e)) return ui;
   //fixing signe
@@ -307,8 +307,8 @@ int unbounded_int_cmp_ll(unbounded_int a, long long b){
 
 static unbounded_int unbounded_int_somme_aux(const unbounded_int a, const unbounded_int b, char signe){
     unbounded_int resultat=create_empty_unbounded_int();
-    
-    //Initialise le signe 
+
+    //Initialise le signe
     resultat.signe=signe;
 
     chiffre *chiffre_zero=malloc(sizeof(chiffre));
@@ -318,7 +318,7 @@ static unbounded_int unbounded_int_somme_aux(const unbounded_int a, const unboun
     chiffre *tmp_1=a.dernier;
     chiffre *tmp_2=b.dernier;
     chiffre *tmp=malloc(sizeof(chiffre));
-    //Initialise la retenue 
+    //Initialise la retenue
     chiffre *r_tmp=malloc(sizeof(chiffre));
     r_tmp->c='0';
 
@@ -330,21 +330,21 @@ static unbounded_int unbounded_int_somme_aux(const unbounded_int a, const unboun
         r_tmp->c=(char) ((tmp_1->c-'0' + tmp_2->c-'0' + r_tmp->c-'0')/10 +'0');
 
         resultat=insertFirst(resultat,tmp->c);
-        //si a.precedent et b.precedent sont null (dernier calcul) 
+        //si a.precedent et b.precedent sont null (dernier calcul)
         if(tmp_1->precedent==NULL && tmp_2->precedent==NULL){
             tmp_1=NULL;
-            tmp_2=NULL;            
+            tmp_2=NULL;
         }
         //si a.precedent est null(a<b)
         else if(tmp_1->precedent==NULL){
             //retourn somme de 0 et b.precedent
-            tmp_1=chiffre_zero;    
+            tmp_1=chiffre_zero;
             tmp_2=tmp_2->precedent;
 
         //si b.precedent est null(a>b)
         }else if(tmp_2->precedent==NULL){
             //retourn somme de 0 et a.precedent
-            tmp_2=chiffre_zero;    
+            tmp_2=chiffre_zero;
             tmp_1=tmp_1->precedent;
 
         //sinon (a.precedent et b.precedent ne sont pas null)
@@ -365,8 +365,8 @@ static unbounded_int unbounded_int_somme_aux(const unbounded_int a, const unboun
 
 static unbounded_int unbounded_int_difference_aux(unbounded_int a, unbounded_int b, char signe){
     unbounded_int resultat=create_empty_unbounded_int();
-    
-    //Initialise le signe 
+
+    //Initialise le signe
     resultat.signe=signe;
 
     chiffre *chiffre_zero=malloc(sizeof(chiffre));
@@ -376,7 +376,7 @@ static unbounded_int unbounded_int_difference_aux(unbounded_int a, unbounded_int
     chiffre *tmp_1=a.dernier;
     chiffre *tmp_2=b.dernier;
     chiffre *tmp=malloc(sizeof(chiffre));
-    //Initialise la retenue 
+    //Initialise la retenue
     chiffre *r_tmp=malloc(sizeof(chiffre));
     r_tmp->c='0';
 
@@ -393,15 +393,15 @@ static unbounded_int unbounded_int_difference_aux(unbounded_int a, unbounded_int
         }
 
         resultat=insertFirst(resultat,tmp->c);
-        //si a.precedent et b.precedent sont null (dernier calcul) 
+        //si a.precedent et b.precedent sont null (dernier calcul)
         if(tmp_1->precedent==NULL && tmp_2->precedent==NULL){
             tmp_1=NULL;
-            tmp_2=NULL;            
+            tmp_2=NULL;
         }
         //si a.precedent est null(a<b)
         else if(tmp_2->precedent==NULL){
             //retourn somme de 0 et a.precedent
-            tmp_2=chiffre_zero;    
+            tmp_2=chiffre_zero;
             tmp_1=tmp_1->precedent;
 
         //sinon (a.precedent et b.precedent ne sont pas null)
@@ -434,11 +434,11 @@ static char* string_produit(char *a, char *b){
   int i=0;
   int j=0;
   int r=0;
-  for( j = 0; i < b_length; i++){ 
+  for( j = 0; i < b_length; i++){
     r = 0;
     if( b[j] == '0' )
       continue;
-    for( i=0; i < a_length; i++ ){ 
+    for( i=0; i < a_length; i++ ){
       int v = (c[i+j] -'0') + (a[i]-'0')*(b[j]-'0') + r;
       c[i+j] = (char)((v % 10)+'0');
       r = v / 10;
@@ -511,7 +511,7 @@ unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b){
 unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
   //variable
   unbounded_int res=string2unbounded_int("0");
-  
+
   char* a_to_inv_str=unbounded_int_to_inv_str(a);
   char* b_to_inv_str=unbounded_int_to_inv_str(b);
 
@@ -533,7 +533,7 @@ unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
     //somme de res et du res_tmp
     unbounded_int res_tmp_inv =str_to_inv_unbounded_int(res_tmp);
     res=unbounded_int_somme(res_tmp_inv,res);
-    
+
     //liberation de la memoire
     free(res_tmp);
     free(decalage);
@@ -550,7 +550,7 @@ unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
 /*---------------------------------------------MAIN---------------------------------------------*/
 
 
-int main(int argc, char const *argv[]) {
+/*int main(int argc, char const *argv[]) {
   // unbounded_int ex1=string2unbounded_int("-93823876688");
   // unbounded_int ex2=ll2unbounded_int((long long)+93807);
   unbounded_int ex1=string2unbounded_int("0980");
