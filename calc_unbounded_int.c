@@ -384,8 +384,8 @@ static void analyse(char* source,Key *point1,Key *point2,size_t length,FILE* fil
         u3=unbounded_int_somme(u1,u2);
         push(point1[0],u3);
       }else if(point1[3].type==STAR){
-        //u3=unbounded_int_produit(u1,u2);
-        //push(point1[0],u3);
+        u3=unbounded_int_produit(u1,u2);
+        push(point1[0],u3);
       }
 
       if(free_1){
@@ -479,7 +479,7 @@ static void interpret(const char* source,FILE* fileout) {
     analyse((char*)source,point1,point2,length,fileout);
     point1=point2;
   }
-  for(int i=0;i<array.count;i++){
+  /*for(int i=0;i<array.count;i++){
     print(array.keys[i]);
   }
 
@@ -487,7 +487,7 @@ static void interpret(const char* source,FILE* fileout) {
   for(int i=0;i<map.count;i++){
     print(map.keys[i]);
     afficher_unbounded_int_(map.values[i]);
-  }
+  }*/
   freeKeyArray();
   freeValueMap();
 }
