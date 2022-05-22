@@ -81,8 +81,8 @@ static unbounded_int insertLast(unbounded_int ui,char c){
   if(ui.dernier==NULL){
     ui.dernier=ch;
     ui.premier=ch;
-    ch->suivant=ch;
-    ch->precedent=ch;
+    ch->suivant=NULL;
+    ch->precedent=NULL;
   }else if(ui.premier==ui.dernier){
     ch->suivant=NULL;
     ch->precedent=ui.premier;
@@ -108,8 +108,8 @@ static unbounded_int insertFirst(unbounded_int ui,char c){
   if(ui.premier==NULL){
     ui.premier=ch;
     ui.dernier=ch;
-    ch->suivant=ch;
-    ch->precedent=ch;
+    ch->suivant=NULL;
+    ch->precedent=NULL;
   }else if(ui.premier==ui.dernier){
     ch->suivant=ui.dernier;
     ch->precedent=NULL;
@@ -139,6 +139,49 @@ static unbounded_int unbounded_int_absolute_value(unbounded_int a){
       }while(tmp!=NULL);
     }
     return abs_value;
+}
+
+//retourne un string representant un unbounded int inversé (absolu)
+static char *unbounded_int_to_inv_str(unbounded_int ui){
+  if(ui.signe=='*') return NULL;
+  char * str= malloc(ui.len*sizeof(char)+2);
+  if(str==NULL){
+    return NULL;
+  }
+  int indice=0;
+  chiffre *tmp=ui.dernier;
+  if(ui.premier==ui.dernier){
+    str[indice]=tmp->c;
+    return str;
+  }
+  while (tmp!=NULL) {
+    str[indice]=tmp->c;
+    tmp=tmp->precedent;
+    indice++;
+  }
+  return str;
+}
+
+//retourne un string representant un unbounded int representant un string inversé (absolu)
+static unbounded_int str_to_inv_unbounded_int( const char *e){
+  
+  unbounded_int ui = create_empty_unbounded_int();
+  if(! matches_unbounded_int(e)) return ui;
+  //fixing signe
+  int indice=0;
+  if(e[0]=='+' || e[0]=='-'){
+    ui.signe=e[0];
+    indice++;
+  }else{
+    ui.signe='+';
+  }
+  //initialising chiiffres
+  for (; indice < strlen(e); indice++) {
+    ui=insertFirst(ui,e[indice]);
+    if(ui.signe=='*') return ui;
+  }
+
+  return ui;
 }
 
 unbounded_int string2unbounded_int(const char *e){
@@ -255,131 +298,155 @@ int unbounded_int_cmp_ll(unbounded_int a, long long b){
 }
 
 
+
 //--------op---------//
 
-static chiffre* chiffre_somme(chiffre a, chiffre b, chiffre r){
-    chiffre *chiffre_zero=malloc(sizeof(chiffre));
-    chiffre_zero->c='0';
-    //somme des entiers courants et de la retenue le tout modulo 10
-    chiffre *tmp=malloc(sizeof(chiffre));
-    tmp->c=(char) ((a.c-'0' + b.c-'0' + r.c-'0')%10 +'0');
-    //Calcul de la retenu pour le prochain calcul
-    chiffre *r_tmp=malloc(sizeof(chiffre));
-    r_tmp->c=(char) ((a.c-'0' + b.c-'0' + r.c-'0')/10 +'0');
 
-    //si a.precedent et b.precedent sont null
-    if(a.precedent==NULL && b.precedent==NULL){
-        //Si retenu!=0
-        if(r_tmp->c!='0'){
-            //calcul de chiffre+1 avec la retenu
-            tmp->precedent=chiffre_somme(*chiffre_zero, *chiffre_zero, *r_tmp);
-            //initialise le suivant de tmp.precedent
-            tmp->precedent->suivant=tmp;
-        }
 
-    //si a.precedent est null
-    }else if(a.precedent==NULL){
-        //retourn somme de 0 et b.precedent
-        tmp->precedent=chiffre_somme(*chiffre_zero, *b.suivant, *r_tmp);
-        //initialise le suivant de tmp.precedent
-        tmp->precedent->suivant=tmp;
 
-    //si b.precedent est null
-    }else if(b.precedent==NULL){
-        //retourn somme de 0 et a.precedent
-        tmp->precedent=chiffre_somme(*a.precedent, *chiffre_zero, *r_tmp);
-        //initialise le suivant de tmp.precedent
-        tmp->precedent->suivant=tmp;
 
-    //sinon (a.precedent et b.precedent ne sont pas null)
-    }else{
-        //somme de a.precedent et b.precedent
-        tmp->precedent=malloc(sizeof(chiffre));
-        tmp->precedent=chiffre_somme(*a.precedent, *b.precedent,*r_tmp);
-        //initialise le suivant de tmp.precedent
-        tmp->precedent->suivant=tmp;
-    }
-    //libère la retenu du prochain calcul et le chiffre zero
-    free(r_tmp);
-    free(chiffre_zero);
-    //retourne le chiffre courant
-    return tmp;
-}
-
-static chiffre* chiffre_difference(chiffre a, chiffre b, chiffre r){
-    //Vérifier que a>b>0
-    chiffre *chiffre_zero=malloc(sizeof(chiffre));
-    chiffre_zero->c='0';
-    chiffre *chiffre_dix=malloc(sizeof(chiffre));
-    chiffre_dix->c=(('9'-'0')+('1'-'0'));
-    //Différence des entiers courants plus la retenu
-    chiffre *tmp=malloc(sizeof(chiffre));
-    tmp->c=(char) (((a.c-'0') - (b.c-'0') - (r.c-'0')) +'0');
-    //Calcul de la retenu pour le prochain calcul
-    chiffre *r_tmp=malloc(sizeof(chiffre));
-    r_tmp->c=(char) (0 +'0');
-    //Si le resultat du calcul courant<0
-    if(tmp->c<'0'){
-        tmp->c+=(('9'-'0')+('1'-'0'));
-        r_tmp->c=(char) (1 +'0');
-    }
-    //si a.precedent et b.precedent sont null
-    if(a.precedent!=NULL && b.precedent!=NULL){
-        //Différence de a.precedent et b.precedent
-        tmp->precedent=malloc(sizeof(chiffre));
-        tmp->precedent=chiffre_difference(*a.precedent, *b.precedent,*r_tmp);
-        //initialise le suivant de tmp.precedent
-        tmp->precedent->suivant=tmp;
-    //si b.precedent est null
-    }else if(a.precedent!=NULL){
-        //Différence de a.precedent et b.precedent
-        tmp->precedent=malloc(sizeof(chiffre));
-        tmp->precedent=chiffre_difference(*a.precedent, *chiffre_zero,*r_tmp);
-        //initialise le suivant de tmp.precedent
-        tmp->precedent->suivant=tmp;
-    }
-    //libère la retenu du prochain calcul, le chiffre zero et le chiffre dix
-    free(r_tmp);
-    free(chiffre_zero);
-    free(chiffre_dix);
-    //retourne le chiffre courant
-    return tmp;
-}
-
-static unbounded_int unbounded_int_somme_aux(unbounded_int a, unbounded_int b, char signe){
+static unbounded_int unbounded_int_somme_aux(const unbounded_int a, const unbounded_int b, char signe){
     unbounded_int resultat=create_empty_unbounded_int();
-    //Initialise le dernier chiffre
-    resultat.dernier=chiffre_somme(*a.dernier,*b.dernier,*(create_chiffre('0')));
-    //Initialise len et le premier chiffre
-    chiffre tmp=*(resultat.dernier);
-    resultat.len++;
-    while(tmp.precedent!=NULL){
-        resultat.len++;
-        tmp=*(tmp.precedent);
-    }
-    resultat.premier=&(tmp);
-    //Initialise le signe
+    
+    //Initialise le signe 
     resultat.signe=signe;
+
+    chiffre *chiffre_zero=malloc(sizeof(chiffre));
+    chiffre_zero->c='0';
+
+    //initialise tmp_1 et tmp-2 aux derniers chiffres de a et b
+    chiffre *tmp_1=a.dernier;
+    chiffre *tmp_2=b.dernier;
+    chiffre *tmp=malloc(sizeof(chiffre));
+    //Initialise la retenue 
+    chiffre *r_tmp=malloc(sizeof(chiffre));
+    r_tmp->c='0';
+
+    //          SUITE
+    while(tmp_1!=NULL && tmp_2!=NULL){
+        //somme des entiers courants et de la retenue le tout modulo 10
+        tmp->c=(char) ((tmp_1->c-'0' + tmp_2->c-'0' + r_tmp->c-'0')%10 +'0');
+        //Calcul de la retenu pour le prochain calcul
+        r_tmp->c=(char) ((tmp_1->c-'0' + tmp_2->c-'0' + r_tmp->c-'0')/10 +'0');
+
+        resultat=insertFirst(resultat,tmp->c);
+        //si a.precedent et b.precedent sont null (dernier calcul) 
+        if(tmp_1->precedent==NULL && tmp_2->precedent==NULL){
+            tmp_1=NULL;
+            tmp_2=NULL;            
+        }
+        //si a.precedent est null(a<b)
+        else if(tmp_1->precedent==NULL){
+            //retourn somme de 0 et b.precedent
+            tmp_1=chiffre_zero;    
+            tmp_2=tmp_2->precedent;
+
+        //si b.precedent est null(a>b)
+        }else if(tmp_2->precedent==NULL){
+            //retourn somme de 0 et a.precedent
+            tmp_2=chiffre_zero;    
+            tmp_1=tmp_1->precedent;
+
+        //sinon (a.precedent et b.precedent ne sont pas null)
+        }else {
+            //somme de a.precedent et b.precedent
+            tmp_1=tmp_1->precedent;
+            tmp_2=tmp_2->precedent;
+
+        }
+    }
+    //Ajout de la retenu si necessaire
+    if(r_tmp->c!='0'){
+        resultat=insertFirst(resultat,r_tmp->c);
+    }
 
     return resultat;
 }
 
 static unbounded_int unbounded_int_difference_aux(unbounded_int a, unbounded_int b, char signe){
     unbounded_int resultat=create_empty_unbounded_int();
-    //Initialise le dernier chiffre
-    resultat.dernier=chiffre_difference(*a.dernier,*b.dernier,*create_chiffre('0'));
-    //Initialise len et le premier chiffre
-    chiffre tmp=*(resultat.dernier);
-    resultat.len++;
-    while(tmp.precedent!=NULL){
-        resultat.len++;
-        tmp=*(tmp.precedent);
-    }
-    resultat.premier=&(tmp);
-    //Initialise le signe
+    
+    //Initialise le signe 
     resultat.signe=signe;
 
+    chiffre *chiffre_zero=malloc(sizeof(chiffre));
+    chiffre_zero->c='0';
+
+    //initialise tmp_1 et tmp-2 aux derniers chiffres de a et b
+    chiffre *tmp_1=a.dernier;
+    chiffre *tmp_2=b.dernier;
+    chiffre *tmp=malloc(sizeof(chiffre));
+    //Initialise la retenue 
+    chiffre *r_tmp=malloc(sizeof(chiffre));
+    r_tmp->c='0';
+
+    //          SUITE
+    while(tmp_1!=NULL && tmp_2!=NULL){
+        //somme des entiers courants et de la retenue le tout modulo 10
+        tmp->c=(char) (((tmp_1->c-'0') - (tmp_2->c-'0') - (r_tmp->c-'0')) +'0');
+        //Calcul de la retenu pour le prochain calcul
+        r_tmp->c=(char) (0 +'0');
+        //Si le resultat du calcul courant<0
+        if(tmp->c<'0'){
+            tmp->c+=(('9'-'0')+('1'-'0')); //equivaut a faire +10
+            r_tmp->c=(char) (1 +'0');
+        }
+
+        resultat=insertFirst(resultat,tmp->c);
+        //si a.precedent et b.precedent sont null (dernier calcul) 
+        if(tmp_1->precedent==NULL && tmp_2->precedent==NULL){
+            tmp_1=NULL;
+            tmp_2=NULL;            
+        }
+        //si a.precedent est null(a<b)
+        else if(tmp_2->precedent==NULL){
+            //retourn somme de 0 et a.precedent
+            tmp_2=chiffre_zero;    
+            tmp_1=tmp_1->precedent;
+
+        //sinon (a.precedent et b.precedent ne sont pas null)
+        }else {
+            //somme de a.precedent et b.precedent
+            tmp_1=tmp_1->precedent;
+            tmp_2=tmp_2->precedent;
+
+        }
+    }
+    //Ajout de la retenu si necessaire
+    if(r_tmp->c!='0'){
+        resultat=insertFirst(resultat,r_tmp->c);
+    }
+
     return resultat;
+}
+
+static char* string_produit(char *a, char *b){
+  //
+  int a_length=strlen(a);
+  int b_length=strlen(b);
+  //Initialisation des chiffres du resultat à '0'
+  char *c=malloc(a_length+2);//+1(taille max du calcul)+1(caractere final)
+  for(int i=0; i<a_length+1; i++){
+      c[i]='0';
+  }
+  c[a_length+1]='\0';
+
+  int i=0;
+  int j=0;
+  int r=0;
+  for( j = 0; i < b_length; i++){ 
+    r = 0;
+    if( b[j] == '0' )
+      continue;
+    for( i=0; i < a_length; i++ ){ 
+      int v = (c[i+j] -'0') + (a[i]-'0')*(b[j]-'0') + r;
+      c[i+j] = (char)((v % 10)+'0');
+      r = v / 10;
+    }
+  c[j+a_length] = (char)(r+'0');
+  }
+
+  return c;//La chaine de caractere retounee
 }
 
 unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
@@ -441,9 +508,57 @@ unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b){
     }
 }
 
+unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
+  //variable
+  unbounded_int res=string2unbounded_int("0");
+  
+  char* a_to_inv_str=unbounded_int_to_inv_str(a);
+  char* b_to_inv_str=unbounded_int_to_inv_str(b);
+
+  //multiplication de a par chaque chiffre de b
+  for(int i=0; i<strlen(b_to_inv_str); i++){
+    char *tmp=string_produit(a_to_inv_str,b_to_inv_str+i);
+    //décalage en fonction de la position du chiffre de b(unité, dizaine...)
+    char *decalage=malloc((sizeof(char)*i)+1);
+    for(int j=0; j<i; j++){
+      decalage[j]='0';
+    }
+    decalage[i+1]='\0';
+
+    //concaténation du décalage et de tmp
+    char *res_tmp=malloc(strlen(tmp)+strlen(decalage)+1);
+    res_tmp[0]='\0';
+    strcpy(res_tmp,decalage);
+    strcat(res_tmp,tmp);
+    //somme de res et du res_tmp
+    unbounded_int res_tmp_inv =str_to_inv_unbounded_int(res_tmp);
+    res=unbounded_int_somme(res_tmp_inv,res);
+    
+    //liberation de la memoire
+    free(res_tmp);
+    free(decalage);
+  }
+
+  //initialisation corecte du signe de res
+  if(a.signe!=b.signe){
+    res.signe='-';
+  }
+
+  return res;
+}
 
 /*---------------------------------------------MAIN---------------------------------------------*/
 
+
+int main(int argc, char const *argv[]) {
+  // unbounded_int ex1=string2unbounded_int("-93823876688");
+  // unbounded_int ex2=ll2unbounded_int((long long)+93807);
+  unbounded_int ex1=string2unbounded_int("0980");
+  unbounded_int ex2=string2unbounded_int("035");
+  unbounded_int test=unbounded_int_somme(ex1,ex2);
+  afficher_unbounded_int(test);
+
+}
 /*int main(int argc, char const *argv[]) {
   unbounded_int ex1=string2unbounded_int("0");
   unbounded_int ex2=ll2unbounded_int((long long)+93807);
