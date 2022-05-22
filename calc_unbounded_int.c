@@ -6,6 +6,51 @@
 #include "scanner.c"
 #include "unbounded_int.c"
 
+
+
+
+static void free_unbounded_int_(unbounded_int ui){
+    chiffre *tmp=ui.premier;
+    if(ui.premier==NULL){
+      return;
+    }
+    if(ui.premier==ui.dernier){
+        free(ui.premier);
+        ui.premier=NULL;
+        return;
+    }
+    while (tmp!=NULL) {
+      chiffre *tmp2=tmp;
+      tmp=tmp->suivant;
+      free(tmp2);
+    }
+    ui.premier=NULL;
+}
+
+static void afficher_unbounded_int_(unbounded_int ui){
+  if(ui.premier==NULL){
+    printf("\n");return;
+  }
+  printf("%c",ui.signe);
+  if(ui.premier==ui.dernier){
+    printf("%c\n",(ui.premier)->c);
+    return;
+  }
+  chiffre *tmp=ui.premier;
+  while (tmp!=NULL) {
+    printf("%c",tmp->c);
+    tmp=tmp->suivant;
+  }
+  printf("\n");
+}
+
+static int min_(Key k1,Key k2){
+  if(k2.length<k1.length){
+    return k2.length;
+  }
+  return k1.length;
+}
+
 /*-----------------------------------------------------------ArrayList------------------------------------------------------------*/
 
 typedef struct {
@@ -42,6 +87,7 @@ static void addKey(Key key){
   array.count++;
 }
 
+
 /*-----------------------------------------------------------Map------------------------------------------------------------*/
 
 typedef struct{
@@ -61,29 +107,11 @@ static void initValueMap() {
   map.capacity=0;
 }
 
-
-static void free_unbounded_int_(unbounded_int ui){
-    chiffre *tmp=ui.premier;
-    if(ui.premier==NULL){
-      return;
-    }
-    if(ui.premier==ui.dernier){
-        free(ui.premier);
-        return;
-    }
-    while (tmp!=NULL) {
-      chiffre *tmp2=tmp;
-      tmp=tmp->suivant;
-      free(tmp2);
-    }
-}
-
-
 static void freeValueMap() {
   free(map.keys);
   free(map.values);
   for(int i=0;i<map.count;i++){
-    free_unbounded_int(map.values[i]);
+    free_unbounded_int_(map.values[i]);
   }
   initValueMap();
 }
@@ -94,11 +122,15 @@ static void push(Key key,unbounded_int value) {
     map.values=(unbounded_int*)malloc(8 * sizeof(unbounded_int));
     map.capacity=8;
   }
+
   //research value
   for(int i=0;i<map.count;i++){
-    if(map.keys[i].start==key.start){
+    if(strncmp(map.keys[i].start,key.start,min_(map.keys[i],key))==0){
       free_unbounded_int_(map.values[i]);
-      map.values[i] = value;
+      map.values[i].premier = value.premier;
+      map.values[i].dernier = value.dernier;
+      map.values[i].signe = value.signe;
+      map.values[i].len = value.len;
       return;
     }
   }
@@ -118,12 +150,11 @@ static void push(Key key,unbounded_int value) {
 static unbounded_int get(Key key) {
   //research value
   for(int i=0;i<map.count;i++){
-    if(map.keys[i].start==key.start){
+    if(strncmp(map.keys[i].start,key.start,min_(map.keys[i],key))==0){
       return map.values[i];
     }
   }
   unbounded_int ui=ll2unbounded_int((long long)0);
-  push(key,ui);
   return ui;
 }
 
@@ -140,7 +171,7 @@ static void closeEverything(char* source){
 static void analyse(char* source,Key *point1,Key *point2,size_t length) {
   if(length==5){
     //variable = entier_ou_variable op entier_ou_variable
-    if(point1[0].type!=VARIABLE || point1[1].type!=EQUAL || (point1[2].type!=VARIABLE && point1[2].type!=NUMBER) || (point1[3].type!=MINUS && point1[3].type!=PLUS && point1[3].type!=STAR) || (point1[4].type!=VARIABLE && point1[4].type!=NUMBER)){
+    /*if(point1[0].type!=VARIABLE || point1[1].type!=EQUAL || (point1[2].type!=VARIABLE && point1[2].type!=NUMBER) || (point1[3].type!=MINUS && point1[3].type!=PLUS && point1[3].type!=STAR) || (point1[4].type!=VARIABLE && point1[4].type!=NUMBER)){
         fprintf(stderr, "%s %d %s\n","error at line",point1->line,"unrecognized sequence");
         closeEverything(source);
     }else{
@@ -171,19 +202,23 @@ static void analyse(char* source,Key *point1,Key *point2,size_t length) {
       }
 
       if(point1[3].type==MINUS){
-
+        u3=unbounded_int_difference(u1,u2);
+        push(point1[0],u3);
       }else if(point1[3].type==PLUS){
-
+        u3=unbounded_int_somme(u1,u2);
+        push(point1[0],u3);
       }else if(point1[3].type==STAR){
-
+        //u3=unbounded_int_produit(u1,u2);
+        //push(point1[0],u3);
       }
+
       if(free_1){
         free_unbounded_int_(u1);
       }
       if(free_2){
         free_unbounded_int_(u2);
       }
-    }
+    }*/
 
   }else if(length==3){
     //variable = entier
@@ -193,7 +228,7 @@ static void analyse(char* source,Key *point1,Key *point2,size_t length) {
     }else{
       char buff[point1[2].length+1];
       memmove( buff, point1[2].start, point1[2].length);
-      buff[point1[2].length+1]='\0';
+      buff[point1[2].length]='\0';
       unbounded_int u1=string2unbounded_int((const char*)buff);
       push(point1[0],u1);
     }
@@ -208,7 +243,9 @@ static void analyse(char* source,Key *point1,Key *point2,size_t length) {
         printf("%c", point1[1].start[i]);
       }
       printf(" = ");
+
       unbounded_int ui=get(point1[1]);
+
       if(ui.premier==NULL){
         printf("\n");return;
       }
@@ -224,12 +261,15 @@ static void analyse(char* source,Key *point1,Key *point2,size_t length) {
       }
       printf("\n");
     }
-
   }else{
       fprintf(stderr, "%s %d %s\n","error at line",point1->line,"unrecognized sequence");
       closeEverything(source);
   }
 }
+
+
+
+
 
 
 
@@ -243,6 +283,8 @@ static void interpret(const char* source) {
     if(t.type==ERROR){
       fprintf(stderr, "Wrong syntaxe at line %d\n", t.line);
       closeEverything((char*)source);
+    }else if(t.type==VARIABLE){
+      push(t,ll2unbounded_int((long long)0));
     }
     addKey(t);
   }while (t.type!=END && t.type!=ERROR);
@@ -254,19 +296,26 @@ static void interpret(const char* source) {
       point2+=1;
     }
     size_t length=point2-point1;
-    /////////////////////////////////----------------------------------------------------------------------------------------------------------------------------////////////////////////////////analyse((char*)source,point1,point2,length);
+    analyse((char*)source,point1,point2,length);
     point1=point2;
   }
   for(int i=0;i<array.count;i++){
     print(array.keys[i]);
   }
-  freeValueMap();
+
+  printf("%s\n","map");
+  for(int i=0;i<map.count;i++){
+    print(map.keys[i]);
+    afficher_unbounded_int_(map.values[i]);
+  }
+
+  //freeValueMap();
   freeKeyArray();
 }
 
 
 
-/*-------------------------------------------------------------------------------------------*/
+/*-----------------------------------readingFiles--------------------------------------------------------*/
 
 /*reading file*/
 static char* readFile(const char* path) {

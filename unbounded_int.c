@@ -134,6 +134,7 @@ static unbounded_int unbounded_int_absolute_value(unbounded_int a){
       chiffre *tmp=a.premier;
       do{
         abs_value=insertLast(abs_value, tmp->c);
+        if(abs_value.signe=='*') return abs_value;
         tmp=tmp->suivant;
       }while(tmp!=NULL);
     }
@@ -167,6 +168,10 @@ unbounded_int ll2unbounded_int(long long i){
     i*=-1;
   }else{
     ui.signe='+';
+  }
+  if(i==0){
+    ui=insertFirst(ui,'0');
+    return ui;
   }
   while (i) {
     char c=(i % 10)+'0';
@@ -437,11 +442,10 @@ unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b){
 }
 
 
-
 /*---------------------------------------------MAIN---------------------------------------------*/
 
 /*int main(int argc, char const *argv[]) {
-  unbounded_int ex1=string2unbounded_int("-93823876688");
+  unbounded_int ex1=string2unbounded_int("0");
   unbounded_int ex2=ll2unbounded_int((long long)+93807);
   afficher_unbounded_int(ex1);
   afficher_unbounded_int(ex2);
