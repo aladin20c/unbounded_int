@@ -2,7 +2,7 @@
 #define unbounded_int_c
 /*
    fichier contenant les definitions des fonctions données dans polynomes.h
-   gcc unbounded_int.c -lm && ./a.out
+   gcc -Wall unbounded_int.c -lm && ./a.out
 */
 
 #include<stdio.h>
@@ -124,21 +124,6 @@ static unbounded_int insertFirst(unbounded_int ui,char c){
   }
   ui.len+=1;
   return ui;
-}
-
-static unbounded_int unbounded_int_absolute_value(unbounded_int a){
-    unbounded_int abs_value=create_empty_unbounded_int();
-    //Initialise le signe à + (positif)
-    if(a.premier!=NULL){
-      abs_value.signe='+';
-      chiffre *tmp=a.premier;
-      do{
-        abs_value=insertLast(abs_value, tmp->c);
-        if(abs_value.signe=='*') return abs_value;
-        tmp=tmp->suivant;
-      }while(tmp!=NULL);
-    }
-    return abs_value;
 }
 
 //retourne un string representant un unbounded int inversé (absolu)
@@ -303,122 +288,189 @@ int unbounded_int_cmp_ll(unbounded_int a, long long b){
 
 
 
-
-
 static unbounded_int unbounded_int_somme_aux(const unbounded_int a, const unbounded_int b, char signe){
-    unbounded_int resultat=create_empty_unbounded_int();
 
+    unbounded_int resultat=create_empty_unbounded_int();
     //Initialise le signe
     resultat.signe=signe;
 
-    chiffre *chiffre_zero=malloc(sizeof(chiffre));
-    chiffre_zero->c='0';
-
-    //initialise tmp_1 et tmp-2 aux derniers chiffres de a et b
     chiffre *tmp_1=a.dernier;
     chiffre *tmp_2=b.dernier;
-    chiffre *tmp=malloc(sizeof(chiffre));
-    //Initialise la retenue
-    chiffre *r_tmp=malloc(sizeof(chiffre));
-    r_tmp->c='0';
+    int rest=0;
 
-    //          SUITE
     while(tmp_1!=NULL && tmp_2!=NULL){
-        //somme des entiers courants et de la retenue le tout modulo 10
-        tmp->c=(char) ((tmp_1->c-'0' + tmp_2->c-'0' + r_tmp->c-'0')%10 +'0');
-        //Calcul de la retenu pour le prochain calcul
-        r_tmp->c=(char) ((tmp_1->c-'0' + tmp_2->c-'0' + r_tmp->c-'0')/10 +'0');
+        int somme= tmp_1->c-'0' + tmp_2->c-'0'+rest;
+        rest=somme/10;
+        char new= somme % 10 +'0';
 
-        resultat=insertFirst(resultat,tmp->c);
-        //si a.precedent et b.precedent sont null (dernier calcul)
-        if(tmp_1->precedent==NULL && tmp_2->precedent==NULL){
-            tmp_1=NULL;
-            tmp_2=NULL;
-        }
-        //si a.precedent est null(a<b)
-        else if(tmp_1->precedent==NULL){
-            //retourn somme de 0 et b.precedent
-            tmp_1=chiffre_zero;
-            tmp_2=tmp_2->precedent;
+        resultat=insertFirst(resultat,new);
+        if(resultat.signe=='*') return resultat;
 
-        //si b.precedent est null(a>b)
-        }else if(tmp_2->precedent==NULL){
-            //retourn somme de 0 et a.precedent
-            tmp_2=chiffre_zero;
-            tmp_1=tmp_1->precedent;
-
-        //sinon (a.precedent et b.precedent ne sont pas null)
-        }else {
-            //somme de a.precedent et b.precedent
-            tmp_1=tmp_1->precedent;
-            tmp_2=tmp_2->precedent;
-
-        }
+        tmp_1=tmp_1->precedent;
+        tmp_2=tmp_2->precedent;
     }
-    //Ajout de la retenu si necessaire
-    if(r_tmp->c!='0'){
-        resultat=insertFirst(resultat,r_tmp->c);
+
+    while(tmp_1!=NULL){
+        int somme= tmp_1->c-'0'+rest;
+        rest=somme/10;
+        char new= somme % 10 +'0';
+
+        resultat=insertFirst(resultat,new);
+        if(resultat.signe=='*') return resultat;
+
+        tmp_1=tmp_1->precedent;
     }
+
+    while(tmp_2!=NULL){
+        int somme= tmp_2->c-'0'+rest;
+        rest=somme/10;
+        char new= somme % 10 +'0';
+
+        resultat=insertFirst(resultat,new);
+        if(resultat.signe=='*') return resultat;
+
+        tmp_2=tmp_2->precedent;
+    }
+
+    if(rest!=0){
+      resultat=insertFirst(resultat,rest+'0');
+    }
+
 
     return resultat;
 }
+
 
 static unbounded_int unbounded_int_difference_aux(unbounded_int a, unbounded_int b, char signe){
-    unbounded_int resultat=create_empty_unbounded_int();
 
-    //Initialise le signe
-    resultat.signe=signe;
+  unbounded_int resultat=create_empty_unbounded_int();
+  //Initialise le signe
+  resultat.signe=signe;
 
-    chiffre *chiffre_zero=malloc(sizeof(chiffre));
-    chiffre_zero->c='0';
+  chiffre *tmp_1=a.dernier;
+  chiffre *tmp_2=b.dernier;
+  int rest=0;
 
-    //initialise tmp_1 et tmp-2 aux derniers chiffres de a et b
-    chiffre *tmp_1=a.dernier;
-    chiffre *tmp_2=b.dernier;
-    chiffre *tmp=malloc(sizeof(chiffre));
-    //Initialise la retenue
-    chiffre *r_tmp=malloc(sizeof(chiffre));
-    r_tmp->c='0';
+  while(tmp_1!=NULL && tmp_2!=NULL){
+      int sous= tmp_1->c-'0' - (tmp_2->c-'0'+rest);
+      if(sous<0){
+        rest=1;
+        sous+=10;
+      }else{
+        rest=0;
+      }
 
-    //          SUITE
-    while(tmp_1!=NULL && tmp_2!=NULL){
-        //somme des entiers courants et de la retenue le tout modulo 10
-        tmp->c=(char) (((tmp_1->c-'0') - (tmp_2->c-'0') - (r_tmp->c-'0')) +'0');
-        //Calcul de la retenu pour le prochain calcul
-        r_tmp->c=(char) (0 +'0');
-        //Si le resultat du calcul courant<0
-        if(tmp->c<'0'){
-            tmp->c+=(('9'-'0')+('1'-'0')); //equivaut a faire +10
-            r_tmp->c=(char) (1 +'0');
-        }
+      char new= sous +'0';
+      resultat=insertFirst(resultat,new);
+      if(resultat.signe=='*') return resultat;
 
-        resultat=insertFirst(resultat,tmp->c);
-        //si a.precedent et b.precedent sont null (dernier calcul)
-        if(tmp_1->precedent==NULL && tmp_2->precedent==NULL){
-            tmp_1=NULL;
-            tmp_2=NULL;
-        }
-        //si a.precedent est null(a<b)
-        else if(tmp_2->precedent==NULL){
-            //retourn somme de 0 et a.precedent
-            tmp_2=chiffre_zero;
-            tmp_1=tmp_1->precedent;
+      tmp_1=tmp_1->precedent;
+      tmp_2=tmp_2->precedent;
+  }
 
-        //sinon (a.precedent et b.precedent ne sont pas null)
-        }else {
-            //somme de a.precedent et b.precedent
-            tmp_1=tmp_1->precedent;
-            tmp_2=tmp_2->precedent;
+  while(tmp_1!=NULL){
+      int sous= (tmp_1->c-'0')-rest;
+      if(sous<0){
+        rest=1;
+        sous+=10;
+      }else{
+        rest=0;
+      }
 
-        }
-    }
-    //Ajout de la retenu si necessaire
-    if(r_tmp->c!='0'){
-        resultat=insertFirst(resultat,r_tmp->c);
-    }
+      char new= sous +'0';
 
-    return resultat;
+      resultat=insertFirst(resultat,new);
+      if(resultat.signe=='*') return resultat;
+
+      tmp_1=tmp_1->precedent;
+  }
+
+  return resultat;
 }
+
+
+unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
+    //utilise les fonction auxilières add et sous selon les signes
+
+    if(a.signe=='+' && b.signe=='+'){//a + b
+
+        return unbounded_int_somme_aux(a,b,'+');
+
+    }else if(a.signe=='-' && b.signe=='-'){//−(|a| + |b|)
+
+        return unbounded_int_somme_aux(a,b,'-');
+
+    }else if(a.signe=='+' && b.signe=='-'){//a − |b|
+
+        b.signe='+';
+        if(unbounded_int_cmp_unbounded_int(a, b)>=0){//|a|>|b|
+
+          b.signe='-';
+          return unbounded_int_difference_aux(a,b,'+');
+
+        }else{
+
+          b.signe='-';
+          return unbounded_int_difference_aux(b,a,'-');//|a|<|b|
+
+        }
+
+    }else{//b − |a|
+        //|a|>|b|
+        a.signe='+';
+        if(unbounded_int_cmp_unbounded_int(b, a)>=0){
+          a.signe='-';
+          return unbounded_int_difference_aux(b,a,'+');
+        //|a|<|b|
+        }else{
+          a.signe='-';
+          return unbounded_int_difference_aux(a,b,'-');
+        }
+
+    }
+}
+
+
+unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b){
+    //utilise les fonction auxilières add et sous selon les signes
+    //a − b
+    if(a.signe=='+' && b.signe=='+'){
+
+        if(unbounded_int_cmp_unbounded_int(a,b)>=0){//|a|>|b|
+
+            return unbounded_int_difference_aux(a,b,'+');
+
+        }else{//|a|<|b|
+
+            return unbounded_int_difference_aux(b,a,'-');
+
+        }
+
+    }else if(a.signe=='-' && b.signe=='-'){//|b| − |a|
+
+        if(unbounded_int_cmp_unbounded_int(a,b)>=0){//|a|>|b|
+
+            return unbounded_int_difference_aux(b,a,'+');
+
+        }else{//|a|<|b|
+
+            return unbounded_int_difference_aux(a,b,'-');
+
+        }
+
+    }else if(a.signe=='+' && b.signe=='-'){//a + |b|
+
+        return unbounded_int_somme_aux(a,b,'+');
+
+    }else{//−(b + |a|)
+
+        return unbounded_int_somme_aux(a,b,'-');
+
+    }
+}
+
+
+
 
 static char* string_produit(char *a, char *b){
   //
@@ -449,64 +501,11 @@ static char* string_produit(char *a, char *b){
   return c;//La chaine de caractere retounee
 }
 
-unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
-    //utilise les fonction auxilières add et sous selon les signes
-    //a + b
-    if(a.signe=='+' && b.signe=='+'){
-        return unbounded_int_somme_aux(a,b,'+');
-    //−(|a| + |b|)
-    }else if(a.signe=='-' && b.signe=='-'){
-        return unbounded_int_somme_aux(a,b,'-');
-    //a − |b|
-    }else if(a.signe=='+' && b.signe=='-'){
-        //|a|>|b|
-        if(unbounded_int_cmp_unbounded_int(a, unbounded_int_absolute_value(b))>=0){
-            return unbounded_int_difference_aux(a,b,'+');
-        //|a|<|b|
-        }else{
-            return unbounded_int_difference_aux(b,a,'-');
-        }
-    //b − |a|
-    }else{
-        //|a|>|b|
-        if(unbounded_int_cmp_unbounded_int(a, unbounded_int_absolute_value(b))>=0){
-            return unbounded_int_difference_aux(b,a,'+');
-        //|a|<|b|
-        }else{
-            return unbounded_int_difference_aux(a,b,'-');
-        }
 
-    }
-}
 
-unbounded_int unbounded_int_difference( unbounded_int a, unbounded_int b){
-    //utilise les fonction auxilières add et sous selon les signes
-    //a − b
-    if(a.signe=='+' && b.signe=='+'){
-        //|a|>|b|
-        if(unbounded_int_cmp_unbounded_int(a,b)>=0){
-            return unbounded_int_difference_aux(a,b,'+');
-        //|a|<|b|
-        }else{
-            return unbounded_int_difference_aux(b,a,'-');
-        }
-    //|b| − |a|
-    }else if(a.signe=='-' && b.signe=='-'){
-        //|a|>|b|
-        if(unbounded_int_cmp_unbounded_int(unbounded_int_absolute_value(a),unbounded_int_absolute_value(b))>=0){
-            return unbounded_int_difference_aux(a,b,'-');
-        //|a|<|b|
-        }else{
-            return unbounded_int_difference_aux(b,a,'+');
-        }
-    //a + |b|
-    }else if(a.signe=='+' && b.signe=='-'){
-        return unbounded_int_somme_aux(a,b,'+');
-    //−(b + |a|)
-    }else{
-        return unbounded_int_somme_aux(a,b,'-');
-    }
-}
+
+
+
 
 unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
   //variable
@@ -550,14 +549,18 @@ unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
 /*---------------------------------------------MAIN---------------------------------------------*/
 
 
-/*int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[]) {
   // unbounded_int ex1=string2unbounded_int("-93823876688");
   // unbounded_int ex2=ll2unbounded_int((long long)+93807);
-  unbounded_int ex1=string2unbounded_int("0980");
-  unbounded_int ex2=string2unbounded_int("035");
-  unbounded_int test=unbounded_int_somme(ex1,ex2);
+  unbounded_int ex1=string2unbounded_int("11");
+  unbounded_int ex2=string2unbounded_int("89");
+  unbounded_int test=unbounded_int_produit(ex1,ex2);
+  afficher_unbounded_int(ex1);
+  afficher_unbounded_int(ex2);
   afficher_unbounded_int(test);
-
+  free_unbounded_int(ex1);
+  free_unbounded_int(ex2);
+  free_unbounded_int(test);
 }
 /*int main(int argc, char const *argv[]) {
   unbounded_int ex1=string2unbounded_int("0");

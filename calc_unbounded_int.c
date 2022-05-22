@@ -377,7 +377,7 @@ static void analyse(char* source,Key *point1,Key *point2,size_t length,FILE* fil
         free_2=1;
       }
 
-      /*if(point1[3].type==MINUS){
+      if(point1[3].type==MINUS){
         u3=unbounded_int_difference(u1,u2);
         push(point1[0],u3);
       }else if(point1[3].type==PLUS){
@@ -386,7 +386,7 @@ static void analyse(char* source,Key *point1,Key *point2,size_t length,FILE* fil
       }else if(point1[3].type==STAR){
         //u3=unbounded_int_produit(u1,u2);
         //push(point1[0],u3);
-      }*/
+      }
 
       if(free_1){
         free_unbounded_int_(u1);
