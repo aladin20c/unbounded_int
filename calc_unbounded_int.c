@@ -241,12 +241,10 @@ static void initKeyArray() {
   array.capacity = 0;
   array.count = 0;
 }
-
 static void freeKeyArray() {
   free(array.keys);
   initKeyArray();
 }
-
 static void addKey(Key key){
   if(array.keys==NULL){
     array.keys=(Key*)malloc(2 * sizeof(Key));
@@ -479,15 +477,6 @@ static void interpret(const char* source,FILE* fileout) {
     analyse((char*)source,point1,point2,length,fileout);
     point1=point2;
   }
-  /*for(int i=0;i<array.count;i++){
-    print(array.keys[i]);
-  }
-
-  printf("%s\n","map");
-  for(int i=0;i<map.count;i++){
-    print(map.keys[i]);
-    afficher_unbounded_int_(map.values[i]);
-  }*/
   freeKeyArray();
   freeValueMap();
 }
@@ -522,13 +511,6 @@ static char* readFile(FILE* file) {
 }
 
 
-/*running program*/
-static void runFile(FILE* filein,FILE* fileout) {
-  char* source = readFile(filein);
-  interpret(source,fileout);
-  free(source);
-}
-
 static FILE* replin() {
   FILE* tmp = tmpfile();
   if (tmp == NULL){
@@ -541,6 +523,13 @@ static FILE* replin() {
 
   rewind(tmp);
   return tmp;
+}
+
+/*running program*/
+static void runFile(FILE* filein,FILE* fileout) {
+  char* source = readFile(filein);
+  interpret(source,fileout);
+  free(source);
 }
 
 

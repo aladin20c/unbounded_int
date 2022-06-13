@@ -2,211 +2,113 @@
    fichier contenant les tests de unbounded-int.c
 */
 
+// gcc -Wall test_unbounded.c && ./a.out
+
+#include <stdio.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<time.h>
 
+#include "unbounded_int.c"
 
-#include "unbounded_int.h"
-
-
-void test_unbounded_int2string(){
-    int number;
-    printf("Test de la fonction unbounded_int2string :\n");
-    srand(time(NULL));
-    number=(rand()%9)+1;
-    unbounded_int test_1=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_1=insertLast(test_1, tmp);
+static void free_unbounded_int__(unbounded_int ui){
+    chiffre *tmp=ui.premier;
+    if(ui.premier==NULL){
+      return;
     }
-    number=rand()%2;
-    if(number==0){
-        test_1.signe='+';
-    }else{
-        test_1.signe='-';
+    if(ui.premier==ui.dernier){
+        free(ui.premier);
+        return;
     }
-    
-    
-    printf("Premier entier : ");
-    afficher_unbounded_int(test_1);
-    char *test =unbounded_int2string(test_1);
-    printf("Resultat : %s\n", test);
-    
+    while (tmp!=NULL) {
+      chiffre *tmp2=tmp;
+      tmp=tmp->suivant;
+      free(tmp2);
+    }
 }
 
-void test_unbounded_int_cmp_unbounded_int(){
-    int number;
-    printf("Test de la fonction unbounded_int_cmp_unbounded_int :\n");
-    srand(time(NULL));
-    number=(rand()%9)+1;
-    unbounded_int test_1=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_1=insertLast(test_1, tmp);
-    }
-    number=rand()%2;
-    if(number==0){
-        test_1.signe='+';
-    }else{
-        test_1.signe='-';
-    }
-    
-    number=rand()%10;
-    unbounded_int test_2=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_2=insertLast(test_2, tmp);
-    }
-    number=rand()%2;
-    if(number==0){
-        test_2.signe='+';
-    }else{
-        test_2.signe='-';
-    }
-    
-    
-    printf("Premier entier : ");
-    afficher_unbounded_int(test_1);
-    printf("Second entier : ");
-    afficher_unbounded_int(test_2);
-    int test =unbounded_int_cmp_unbounded_int(test_1,test_2);
-    printf("Resultat : %d\n",test);
-    afficher_unbounded_int(test);
+static void afficher_unbounded_int__(unbounded_int ui){
+  if(ui.premier==NULL){
+    printf("\n");return;
+  }
+  printf("%c",ui.signe);
+  if(ui.premier==ui.dernier){
+    printf("%c\n",(ui.premier)->c);
+    return;
+  }
+  chiffre *tmp=ui.premier;
+  while (tmp!=NULL) {
+    printf("%c",tmp->c);
+    tmp=tmp->suivant;
+  }
+  printf("\n");
 }
 
-void test_unbounded_int_somme(){
-    int number;
-    printf("Test de la fonction unbounded_int_somme :\n");
-    srand(time(NULL));
-    number=(rand()%9)+1;
-    unbounded_int test_1=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_1=insertLast(test_1, tmp);
-    }
-    number=rand()%2;
-    if(number==0){
-        test_1.signe='+';
-    }else{
-        test_1.signe='-';
-    }
-    
-    number=rand()%10;
-    unbounded_int test_2=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_2=insertLast(test_2, tmp);
-    }
-    number=rand()%2;
-    if(number==0){
-        test_2.signe='+';
-    }else{
-        test_2.signe='-';
-    }
-    
-    
-    printf("Premier entier : ");
-    afficher_unbounded_int(test_1);
-    printf("Second entier : ");
-    afficher_unbounded_int(test_2);
-    unbounded_int test =unbounded_int_somme(test_1,test_2);
-    printf("Resultat : ");
-    afficher_unbounded_int(test);
-}
 
-void test_unbounded_int_difference(){
-    int number;
-    printf("Test de la fonction unbounded_int_difference :\n");
-    srand(time(NULL));
-    number=(rand()%9)+1;
-    unbounded_int test_1=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_1=insertLast(test_1, tmp);
-    }
-    number=rand()%2;
-    if(number==0){
-        test_1.signe='+';
-    }else{
-        test_1.signe='-';
-    }
-    
-    number=rand()%10;
-    unbounded_int test_2=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_2=insertLast(test_2, tmp);
-    }
-    number=rand()%2;
-    if(number==0){
-        test_2.signe='+';
-    }else{
-        test_2.signe='-';
-    }
-    
-    
-    printf("Premier entier : ");
-    afficher_unbounded_int(test_1);
-    printf("Second entier : ");
-    afficher_unbounded_int(test_2);
-    unbounded_int test =unbounded_int_difference(test_1,test_2);
-    printf("Resultat : ");
-    afficher_unbounded_int(test);
-}
+int main(int argc, char const *argv[]) {
 
-void test_unbounded_int_produit(){
-    int number;
-    printf("Test de la fonction unbounded_int_produit :\n");
-    srand(time(NULL));
-    number=(rand()%9)+1;
-    unbounded_int test_1=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_1=insertLast(test_1, tmp);
-    }
-    number=rand()%2;
-    if(number==0){
-        test_1.signe='+';
-    }else{
-        test_1.signe='-';
-    }
-    
-    number=rand()%10;
-    unbounded_int test_2=create_empty_unbounded_int();
-    for(int i=0;i<number; i++){
-        number=rand()%10;
-        char tmp=(char)number+'0';
-        test_2=insertLast(test_2, tmp);
-    }
-    number=rand()%2;
-    if(number==0){
-        test_2.signe='+';
-    }else{
-        test_2.signe='-';
-    }
-    
-    
-    printf("Premier entier : ");
-    afficher_unbounded_int(test_1);
-    printf("Second entier : ");
-    afficher_unbounded_int(test_2);
-    unbounded_int test =unbounded_int_produit(test_1,test_2);
-    printf("Resultat : ");
-    afficher_unbounded_int(test);
-}
+  printf("%s\n","__________________________test__________________________");
 
-int main(){
-    
+  printf("%s\n","string2unbounded_int(\"999\");");
+  unbounded_int ex1=string2unbounded_int("999");
+  printf("unbounded_int : ex1 :");
+  afficher_unbounded_int__(ex1);
 
-    return 0;
+
+  printf("%s\n","ll2unbounded_int((long long)+93807)");
+  unbounded_int ex2=ll2unbounded_int((long long)+93807);
+  printf("unbounded_int : ex2 :");
+  afficher_unbounded_int__(ex2);
+
+  printf("\ncomparaison\n");
+  printf("%s\n","compare ex1 to -938238");
+  printf("%d\n", unbounded_int_cmp_ll(ex1,-93823876688));
+  printf("%s\n","compare ex1 to ex2");
+  printf("%d\n", unbounded_int_cmp_unbounded_int(ex1,ex2));
+  printf("%s\n","compare ex1 to 888");
+  printf("%d\n", unbounded_int_cmp_ll(ex1,888));
+
+
+  printf("\n ex1 to string\n");
+  printf("%s\n",unbounded_int2string(ex1));
+
+
+
+  printf("Test de unbounded_int_somme :\n");
+  unbounded_int ex3=ll2unbounded_int((long long)250);
+  unbounded_int ex4=ll2unbounded_int((long long)750);
+  printf("ex3 : ");afficher_unbounded_int__(ex3);
+  printf("ex4 : ");afficher_unbounded_int__(ex4);
+  unbounded_int ex5=unbounded_int_somme(ex3,ex4);
+  printf("ex3 + ex4 : ");
+  afficher_unbounded_int__(ex5);
+  //free
+
+
+  printf("unbounded_int_difference :\n");
+  printf("ex1 - ex2 : ");
+  unbounded_int ex6=unbounded_int_difference(ex1,ex2);
+  afficher_unbounded_int__(ex6);
+
+
+  printf("unbounded_int_produit :\n");
+  unbounded_int ex7=ll2unbounded_int((long long)+25678909);
+  unbounded_int ex8=ll2unbounded_int((long long)+556);
+  printf("ex7 : ");afficher_unbounded_int__(ex7);
+  printf("ex8 : ");afficher_unbounded_int__(ex8);
+  unbounded_int ex9=unbounded_int_produit(ex7,ex8);
+  printf("ex7 * ex8 : ");afficher_unbounded_int__(ex9);
+
+
+  free_unbounded_int__(ex1);
+  free_unbounded_int__(ex2);
+  free_unbounded_int__(ex3);
+  free_unbounded_int__(ex4);
+  free_unbounded_int__(ex5);
+  free_unbounded_int__(ex6);
+  free_unbounded_int__(ex7);
+  free_unbounded_int__(ex8);
+  free_unbounded_int__(ex9);
+  return 0;
 }
